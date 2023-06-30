@@ -45,7 +45,10 @@ class Genre(models.Model):
         return self.name
 
 
-class Title(models.Model):
+class Title(models.Model):  # Еще есть идея попробовать
+    # Добавить поле, которое будет варьироваться
+    # в зависимости от выбранной категории произведения: "автор" для книги, "режиссер" для фильма
+    # и "исполнитель" для песни. Если время останется
     name = models.CharField(
         max_length=100,
         verbose_name='Название произведения',

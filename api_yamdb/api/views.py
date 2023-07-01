@@ -15,3 +15,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class GenreViewSet(viewsets.ModelViewSet):
     pass
+
+
+class TestViewSet(viewsets.ModelViewSet):
+    pass

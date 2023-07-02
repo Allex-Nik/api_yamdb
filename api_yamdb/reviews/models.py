@@ -1,17 +1,17 @@
 from django.db import models
 
-from .validators import latin_alphanumeric_validator
+from .validators import latin_alphanumeric_validator, year_validator
 
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=100,
+        max_length=256,
         unique=True,
         verbose_name='Название категории',
         help_text='Выберите категорию произведения'
     )
     slug = models.SlugField(
-        max_length=100,
+        max_length=50,
         unique=True,
         validators=[latin_alphanumeric_validator]
     )
@@ -26,13 +26,13 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=100,
+        max_length=256,
         unique=True,
         verbose_name='Название жанра',
         help_text='Выберите жанр произведения'
     )
     slug = models.SlugField(
-        max_length=100,
+        max_length=50,
         unique=True,
         validators=[latin_alphanumeric_validator]
     )
@@ -50,15 +50,16 @@ class Title(models.Model):  # Еще есть идея попробовать
     # в зависимости от выбранной категории произведения: "автор" для книги, "режиссер" для фильма
     # и "исполнитель" для песни. Если время останется
     name = models.CharField(
-        max_length=100,
+        max_length=256,
         verbose_name='Название произведения',
         help_text='Укажите название произведения'
     )
-    date = models.DateField(
+    year = models.IntegerField(
         null=True,
         blank=True,
-        verbose_name='Дата релиза',
-        help_text='Выберите дату релиза'
+        verbose_name='Год выпуска',
+        help_text='Выберите год выпуска',
+        validators=[year_validator]
     )
     description = models.TextField(
         blank=True,

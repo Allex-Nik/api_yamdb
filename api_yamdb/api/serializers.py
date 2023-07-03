@@ -18,18 +18,22 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(slug_field='username', read_only=True)
-
-    class Meta:
-        fields = '__all__'
-        model = Review
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+    author = SlugRelatedField(
+        slug_field='username', 
+        read_only=True
     )
 
     class Meta:
-        fields = '__all__'
+        model = Review
+        fields = ('id', 'author', 'text', 'rating', 'pub_date')   
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(
+        slug_field='username', 
+        read_only=True
+    )
+
+    class Meta:
         model = Comment
+        fields = ('id', 'author', 'text', 'pub_date')

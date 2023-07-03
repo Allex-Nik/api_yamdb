@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 
 
@@ -14,9 +15,15 @@ ROLES = [
 
 
 class User(AbstractUser):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.is_superuser:
+            self.role = ADMIN
+
     username = models.CharField(
         max_length=150,
-        unique=True
+        unique=True,
+        validators=[RegexValidator(regex=r'^[\\w.@+-]+\\z')]
     )
     email = models.EmailField(
         max_length=254,
@@ -37,3 +44,27 @@ class User(AbstractUser):
         choices=ROLES,
         default=USER
     )
+    confirmation_code = models.CharField(
+        blank=True,
+        max_length=50
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('username', 'email'),
+                name='уникальный пользователь'
+            )
+        ]
+
+    @property
+    def is_admin(self):
+        return self.role == ADMIN or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == USER

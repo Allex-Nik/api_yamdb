@@ -2,15 +2,18 @@ from random import randint as create_code
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
+from .filters import TitleFilter
 from .permissions import Admin
-from .serializers import SignupSerializer, TokenSerializer, UserSerializer
+from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer
 from users.models import User
+from api_yamdb.reviews.models import Title, Category, Genre
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -87,3 +90,27 @@ def send_confirmation_code(user):
     from_email = 'admin@yamdb.com'
     to_email = [user.email]
     return send_mail(subject, message, from_email, to_email)
+
+
+#  Нужно добавить права доступа для вьюсетов
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)

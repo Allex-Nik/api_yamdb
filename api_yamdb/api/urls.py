@@ -1,12 +1,15 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import signup, token, UserViewSet
+from .views import signup, token, UserViewSet, TitleViewSet, CategoryViewSet, GenreViewSet
 
 
 router = DefaultRouter()
 
 router.register(r'users', UserViewSet)
+router.register('titles', TitleViewSet, basename='titles')
+router.register('categories', CategoryViewSet, basename='categories')
+router.register('genres', GenreViewSet, basename='genres')
 
 auth_urls = [
     path('auth/signup/', signup, name='signup'),

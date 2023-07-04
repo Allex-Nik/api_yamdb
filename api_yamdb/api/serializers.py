@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from api_yamdb.reviews.models import Title, Category, Genre
 from users.models import User
 
 
@@ -44,3 +45,24 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
+
+        
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name', 'slug']
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['name', 'slug']
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer
+    genre = GenreSerializer(many=True)
+
+    class Meta:
+        model = Title
+        fields = ['id', 'name', 'year', 'description', 'category', 'genre']

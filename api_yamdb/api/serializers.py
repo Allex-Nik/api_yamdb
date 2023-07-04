@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -9,10 +10,13 @@ from users.models import User
 
 class SignupSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        max_length=150
+        max_length=150,
+        required=True,
+        validators=[RegexValidator(regex=r'^[\w.@+-]+$')]
     )
     email = serializers.EmailField(
-        max_length=254
+        max_length=254,
+        required=True
     )
 
     class Meta:

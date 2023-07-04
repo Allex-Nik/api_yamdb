@@ -18,12 +18,13 @@ from reviews.models import Title, Category, Genre, Review
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    lookup_field = 'username'
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (Admin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ('get', 'post', 'patch', 'delete',)
 
     @action(
         methods=['GET', 'PATCH'],

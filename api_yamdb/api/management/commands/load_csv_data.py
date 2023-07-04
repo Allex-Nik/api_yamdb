@@ -2,7 +2,7 @@ from csv import DictReader
 
 from django.core.management.base import BaseCommand
 
-from api_yamdb.reviews.models import Category, Genre, Title, GenreToTitle  # Comment, Review
+from reviews.models import Category, Genre, Title, GenreToTitle  # Comment, Review
 # from api_yamdb.users.models import User
 
 

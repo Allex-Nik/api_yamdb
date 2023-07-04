@@ -14,7 +14,7 @@ from .filters import TitleFilter
 from .permissions import Admin
 from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer
 from users.models import User
-from api_yamdb.reviews.models import Title, Category, Genre, Review
+from reviews.models import Title, Category, Genre, Review
 
 
 class UserViewSet(viewsets.ModelViewSet):

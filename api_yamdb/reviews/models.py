@@ -6,6 +6,7 @@ from .validators import latin_alphanumeric_validator, year_validator
 
 User = get_user_model()
 
+
 class Category(models.Model):
     name = models.CharField(
         max_length=256,

@@ -11,7 +11,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
 from .filters import TitleFilter
-from .permissions import Admin
+from .permissions import Admin, AdminOrReadOnly, AdminModeratorOwnerOrReadOnly
 from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer
 from users.models import User
 from reviews.models import Title, Category, Genre, Review
@@ -99,6 +99,7 @@ def send_confirmation_code(user):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
@@ -106,6 +107,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (AdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -113,6 +115,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (AdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 
@@ -120,7 +123,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    #permission_classes = 
+    #permission_classes =
     pagination_class = LimitOffsetPagination
     
     def get_title(self):
@@ -135,7 +138,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes = 
+    #permission_classes =
     pagination_class = LimitOffsetPagination
 
     def get_review(self):

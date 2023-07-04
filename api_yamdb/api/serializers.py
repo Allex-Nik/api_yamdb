@@ -1,5 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
+
+
+from reviews.models import Comment, Review
 
 from api_yamdb.reviews.models import Title, Category, Genre
 from users.models import User
@@ -54,6 +58,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+  
     class Meta:
         model = Genre
         fields = ['name', 'slug']
@@ -66,3 +71,25 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ['id', 'name', 'year', 'description', 'category', 'genre']
+        
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(
+        slug_field='username', 
+        read_only=True
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'author', 'text', 'rating', 'pub_date')   
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = SlugRelatedField(
+        slug_field='username', 
+        read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'author', 'text', 'pub_date')

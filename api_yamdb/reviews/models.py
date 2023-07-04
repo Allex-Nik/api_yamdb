@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import latin_alphanumeric_validator, year_validator
 
+User = get_user_model()
 
 class Category(models.Model):
     name = models.CharField(
@@ -86,10 +89,71 @@ class Title(models.Model):  # Еще есть идея попробовать
     def __str__(self):
         return self.name
 
-
+      
 class GenreToTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.title} {self.genre}'
+      
+      
+class Review(models.Model):
+    author = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='reviews'
+    )
+    text = models.TextField()
+    rating = models.IntegerField(validators=[MinValueValidator(1),
+                                MaxValueValidator(10)])
+    pub_date = models.DateTimeField(
+        'Дата публикации', 
+        auto_now_add=True
+    )
+    title = models.ForeignKey(
+        Title, 
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+
+    def __str__(self):
+        return self.text
+
+
+    class Meta:
+        ordering = ["-pub_date"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'], 
+                name='review_unique'
+            )
+        ]
+        verbose_name = 'Отзыв'
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='comments'
+    )
+    review = models.ForeignKey(
+        Review, 
+        on_delete=models.CASCADE, 
+        related_name='comments'
+    )
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата добавления', 
+        auto_now_add=True, 
+        db_index=True
+    )
+
+    def __str__(self):
+        return self.text
+
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = 'Комментарий'

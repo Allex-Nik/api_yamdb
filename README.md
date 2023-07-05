@@ -1,5 +1,5 @@
 # api_yamdb
-api_yamdb 
+
  
 Для того чтобы открыть проект: 
 1. Клонируйте репозиторий себе на ПК.  
@@ -14,3 +14,4 @@ pip install -r requirements.txt
 python3 manage.py migrate 
 5. Запустите сервер (в директории с manage.py): 
 python3 manage.py runserver 
+

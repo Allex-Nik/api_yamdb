@@ -1,10 +1,11 @@
-from random import randint as create_code
+import random
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
@@ -18,12 +19,13 @@ from reviews.models import Title, Category, Genre, Review
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    lookup_field = 'username'
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (Admin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ('get', 'post', 'patch', 'delete',)
 
     @action(
         methods=['GET', 'PATCH'],
@@ -45,27 +47,34 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny, ])
+@api_view(('POST',))
+@permission_classes((AllowAny,))
 def signup(request):
-    serializer = SignupSerializer(data=request.data)
-    email = request.data.get('email')
-    user = User.objects.filter(email=email)
-    if user.exists():
-        user = user.get(email=email)
-        send_confirmation_code(user)
-        return Response(
-            {'message': 'Такой пользователь уже существует.'},
-            status=status.HTTP_400_BAD_REQUEST
+    username = request.data.get('username')
+    if User.objects.filter(username=username).exists():
+        user = get_object_or_404(User, username=username)
+        serializer = SignupSerializer(
+            user, data=request.data, partial=True
         )
-    else:
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get('email')
-        username = serializer.validated_data.get('username')
-        user = User.objects.get_or_create(username=username,
-                                          email=email)
-        send_confirmation_code(user)
+        serializer.is_valid()
+        if serializer.validated_data['email'] != user.email:
+            return Response(tatus=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
+        send_confirmation_code(username)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    serializer = SignupSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    if serializer.validated_data['username'] != 'me':
+        serializer.save()
+        send_confirmation_code(username)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(
+        (
+            'Использование имени пользователя me запрещено!'
+        ),
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 @api_view(['POST'])
@@ -80,17 +89,21 @@ def token(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def send_confirmation_code(user):
-    code = create_code(100000, 999999)
-    username = User.username
+def send_confirmation_code(username):
     user = get_object_or_404(User, username=username)
-    user.confirmation_code = code
+    confirmation_code = int(
+        ''.join([str(random.randrange(0, 10))
+                 for _ in range(16)])
+    )
+    user.confirmation_code = confirmation_code
+    send_mail(
+        'Код подтвержения Yamdb',
+        f'Ваш код подтвержения: {user.confirmation_code}',
+        'admin@yamdb.com',
+        (user.email,),
+        fail_silently=False,
+    )
     user.save()
-    subject = 'Код авторизации на YaMDb.'
-    message = f'Ваш код для авторизации: {code}'
-    from_email = 'admin@yamdb.com'
-    to_email = [user.email]
-    return send_mail(subject, message, from_email, to_email)
 
 
 #  Нужно добавить права доступа для вьюсетов

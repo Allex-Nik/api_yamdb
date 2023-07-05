@@ -15,15 +15,14 @@ ROLES = [
 
 
 class User(AbstractUser):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.is_superuser:
-            self.role = ADMIN
-
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=[RegexValidator(regex=r'^[\\w.@+-]+\\z')]
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$'
+            )
+        ]
     )
     email = models.EmailField(
         max_length=254,
@@ -56,6 +55,9 @@ class User(AbstractUser):
                 name='уникальный пользователь'
             )
         ]
+
+    def __str__(self):
+        return self.username
 
     @property
     def is_admin(self):

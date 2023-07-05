@@ -12,8 +12,15 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
 from .filters import TitleFilter
-from .permissions import Admin
-from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer
+
+from .permissions import (
+    Admin,
+    AdminOrReadOnly,
+    AdminModeratorOwnerOrReadOnly
+    # TitlePermission,
+    # ReviewPermission
+)
+from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer, TitleSerializerRead, TitleSerializerCreate
 from users.models import User
 from reviews.models import Title, Category, Genre, Review
 
@@ -112,28 +119,42 @@ def send_confirmation_code(username):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = (AdminOrReadOnly,)
+    # permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH', 'DELETE',):
+            return TitleSerializerCreate
+        return TitleSerializerRead
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = (AdminOrReadOnly,)
+    # permission_classes = (TitlePermission,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (AdminOrReadOnly,)
+    # permission_classes = (TitlePermission,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    #permission_classes = 
+    #permission_classes =
+    # permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
     
     def get_title(self):
@@ -148,7 +169,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes = 
+    #permission_classes =
+    # permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
 
     def get_review(self):

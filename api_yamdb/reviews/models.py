@@ -49,10 +49,7 @@ class Genre(models.Model):
         return self.name
 
 
-class Title(models.Model):  # Еще есть идея попробовать
-    # Добавить поле, которое будет варьироваться
-    # в зависимости от выбранной категории произведения: "автор" для книги, "режиссер" для фильма
-    # и "исполнитель" для песни. Если время останется
+class Title(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Название произведения',
@@ -106,7 +103,7 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    rating = models.IntegerField(validators=[MinValueValidator(1),
+    score = models.IntegerField(validators=[MinValueValidator(1),
                                 MaxValueValidator(10)])
     pub_date = models.DateTimeField(
         'Дата публикации', 
@@ -120,7 +117,6 @@ class Review(models.Model):
 
     def __str__(self):
         return self.text
-
 
     class Meta:
         ordering = ["-pub_date"]
@@ -153,7 +149,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-
 
     class Meta:
         ordering = ["id"]

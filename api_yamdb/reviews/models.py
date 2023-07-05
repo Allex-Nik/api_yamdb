@@ -87,15 +87,15 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
-      
+
 class GenreToTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.title} {self.genre}'
-      
-      
+
+
 class Review(models.Model):
     author = models.ForeignKey(
         User,
@@ -131,19 +131,19 @@ class Review(models.Model):
 
 class Comment(models.Model):
     author = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='comments'
     )
     review = models.ForeignKey(
-        Review, 
-        on_delete=models.CASCADE, 
+        Review,
+        on_delete=models.CASCADE,
         related_name='comments'
     )
     text = models.TextField()
     pub_date = models.DateTimeField(
-        'Дата добавления', 
-        auto_now_add=True, 
+        'Дата добавления',
+        auto_now_add=True,
         db_index=True
     )
 

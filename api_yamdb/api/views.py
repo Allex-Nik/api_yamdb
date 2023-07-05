@@ -1,7 +1,7 @@
 import random
 
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -12,13 +12,20 @@ from rest_framework.response import Response
 
 from .filters import TitleFilter
 
-from .permissions import (
-    Admin,
-    AdminOrReadOnly,
-    AdminModeratorOwnerOrReadOnly,
-    ReviewPermission
-)
-from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer, TitleSerializerRead, TitleSerializerCreate
+from .permissions import (Admin,
+                          AdminOrReadOnly,
+                          AdminModeratorOwnerOrReadOnly,
+                          ReviewPermission)
+from .serializers import (SignupSerializer,
+                          TokenSerializer,
+                          UserSerializer,
+                          TitleSerializer,
+                          CategorySerializer,
+                          GenreSerializer,
+                          CommentSerializer,
+                          ReviewSerializer,
+                          TitleSerializerRead,
+                          TitleSerializerCreate)
 from users.models import User
 from reviews.models import Title, Category, Genre, Review
 
@@ -63,11 +70,14 @@ def signup(request):
         )
         serializer.is_valid()
         if serializer.validated_data['email'] != user.email:
-            return Response(tatus=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         send_confirmation_code(username)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    else:
+        email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     if serializer.validated_data['username'] != 'me':

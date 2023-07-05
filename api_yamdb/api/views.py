@@ -11,10 +11,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
 from .filters import TitleFilter
-
 from .permissions import (Admin,
                           AdminOrReadOnly,
-                          AdminModeratorOwnerOrReadOnly,
                           ReviewPermission)
 from .serializers import (SignupSerializer,
                           TokenSerializer,
@@ -180,7 +178,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
-    
+
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get("title_id"))
 

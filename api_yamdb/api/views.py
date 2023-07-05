@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404, render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import AccessToken
@@ -16,9 +15,8 @@ from .filters import TitleFilter
 from .permissions import (
     Admin,
     AdminOrReadOnly,
-    AdminModeratorOwnerOrReadOnly
-    # TitlePermission,
-    # ReviewPermission
+    AdminModeratorOwnerOrReadOnly,
+    ReviewPermission
 )
 from .serializers import SignupSerializer, TokenSerializer, UserSerializer, TitleSerializer, CategorySerializer, GenreSerializer, CommentSerializer, ReviewSerializer, TitleSerializerRead, TitleSerializerCreate
 from users.models import User
@@ -120,7 +118,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnly,)
-    # permission_classes = (TitlePermission,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
@@ -134,27 +131,44 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (AdminOrReadOnly,)
-    # permission_classes = (TitlePermission,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PATCH':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
 
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
-    # permission_classes = (TitlePermission,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        if request.method == 'GET' and request.user.is_admin:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().retrieve(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PATCH' and request.user.is_admin:
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    #permission_classes =
-    # permission_classes = (ReviewPermission,)
+    permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
     
     def get_title(self):
@@ -169,8 +183,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes =
-    # permission_classes = (ReviewPermission,)
+    permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
 
     def get_review(self):

@@ -98,19 +98,19 @@ class GenreToTitle(models.Model):
       
 class Review(models.Model):
     author = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='reviews'
     )
     text = models.TextField()
     score = models.IntegerField(validators=[MinValueValidator(1),
                                 MaxValueValidator(10)])
     pub_date = models.DateTimeField(
-        'Дата публикации', 
+        'Дата публикации',
         auto_now_add=True
     )
     title = models.ForeignKey(
-        Title, 
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
@@ -122,7 +122,7 @@ class Review(models.Model):
         ordering = ["-pub_date"]
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'title'], 
+                fields=['author', 'title'],
                 name='review_unique'
             )
         ]

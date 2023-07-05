@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
+from rest_framework.exceptions import ValidationError
 
 
 from reviews.models import Comment, Review, Title, Category, Genre
@@ -79,7 +80,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(
         slug_field='username', 
-        read_only=True
+        read_only=True,
     )
 
     class Meta:

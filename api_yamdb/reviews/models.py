@@ -55,7 +55,7 @@ class Title(models.Model):
         verbose_name='Название произведения',
         help_text='Укажите название произведения'
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         null=True,
         blank=True,
         verbose_name='Год выпуска',
@@ -103,8 +103,8 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    score = models.IntegerField(validators=[MinValueValidator(1),
-                                MaxValueValidator(10)])
+    score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1, 'Минимальная оценка - 1'),
+                                MaxValueValidator(10, 'Максимальная оценка - 10')])
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True
@@ -115,11 +115,8 @@ class Review(models.Model):
         related_name='reviews'
     )
 
-    def __str__(self):
-        return self.text
-
     class Meta:
-        ordering = ["-pub_date"]
+        ordering = ['-pub_date']
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -127,6 +124,9 @@ class Review(models.Model):
             )
         ]
         verbose_name = 'Отзыв'
+
+    def __str__(self):
+        return self.text
 
 
 class Comment(models.Model):
@@ -146,10 +146,10 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
+    
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Комментарий'
 
     def __str__(self):
         return self.text
-
-    class Meta:
-        ordering = ["id"]
-        verbose_name = 'Комментарий'

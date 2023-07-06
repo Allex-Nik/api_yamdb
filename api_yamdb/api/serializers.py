@@ -56,14 +56,14 @@ class UserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name', 'slug']
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ['name', 'slug']
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -73,7 +73,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ['id', 'name', 'year', 'description', 'category', 'genre']
+        fields = ('id', 'name', 'year', 'description', 'category', 'genre')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -89,11 +89,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         if request.method == 'POST':
-            review = Review.objects.filter(
+            if Review.objects.filter(
                 title=self.context['view'].kwargs.get('title_id'),
                 author=self.context['request'].user
-            )
-            if review.exists():
+            ).exists():
                 raise serializers.ValidationError(
                     'Вы уже оставили свой отзыв.'
                 )

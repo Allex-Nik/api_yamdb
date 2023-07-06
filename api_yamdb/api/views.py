@@ -119,9 +119,6 @@ def send_confirmation_code(username):
     user.save()
 
 
-#  Нужно добавить права доступа для вьюсетов
-
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer

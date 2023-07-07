@@ -1,6 +1,5 @@
 from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -113,7 +112,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class TitleSerializerRead(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField()
 
     class Meta:
         model = Title
@@ -121,10 +120,6 @@ class TitleSerializerRead(serializers.ModelSerializer):
             'id', 'name', 'description', 'year', 'category', 'genre', 'rating'
         )
         read_only_fields = ('id',)
-
-    def get_rating(self, obj):
-        obj = obj.reviews.all().aggregate(rating=Avg('score'))
-        return obj['rating']
 
 
 class TitleSerializerCreate(serializers.ModelSerializer):

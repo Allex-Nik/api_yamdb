@@ -1,9 +1,10 @@
 import random
 
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, status, viewsets, mixins
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -120,7 +121,7 @@ def send_confirmation_code(username):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
@@ -132,7 +133,16 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializerRead
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class ExcludeRetrieveUpdateViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoryViewSet(ExcludeRetrieveUpdateViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (AdminOrReadOnly,)
@@ -140,34 +150,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
-    def retrieve(self, request, *args, **kwargs):
-        if request.method == 'GET':
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().retrieve(request, *args, **kwargs)
 
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PATCH':
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().update(request, *args, **kwargs)
-
-
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ExcludeRetrieveUpdateViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
-
-    def retrieve(self, request, *args, **kwargs):
-        if request.method == 'GET' and request.user.is_admin:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().retrieve(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PATCH' and request.user.is_admin:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().update(request, *args, **kwargs)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

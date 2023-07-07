@@ -103,8 +103,10 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1, 'Минимальная оценка - 1'),
-                                MaxValueValidator(10, 'Максимальная оценка - 10')])
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1, 'Минимальная оценка - 1'),
+                    MaxValueValidator(10, 'Максимальная оценка - 10')]
+    )
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True
@@ -146,7 +148,7 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
-    
+
     class Meta:
         ordering = ['id']
         verbose_name = 'Комментарий'

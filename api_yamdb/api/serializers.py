@@ -1,6 +1,5 @@
 from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -56,14 +55,14 @@ class UserSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name', 'slug']
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ['name', 'slug']
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -73,7 +72,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ['id', 'name', 'year', 'description', 'category', 'genre']
+        fields = ('id', 'name', 'year', 'description', 'category', 'genre')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -89,11 +88,10 @@ class ReviewSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         if request.method == 'POST':
-            review = Review.objects.filter(
+            if Review.objects.filter(
                 title=self.context['view'].kwargs.get('title_id'),
                 author=self.context['request'].user
-            )
-            if review.exists():
+            ).exists():
                 raise serializers.ValidationError(
                     'Вы уже оставили свой отзыв.'
                 )
@@ -114,7 +112,7 @@ class CommentSerializer(serializers.ModelSerializer):
 class TitleSerializerRead(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.FloatField()
 
     class Meta:
         model = Title
@@ -122,10 +120,6 @@ class TitleSerializerRead(serializers.ModelSerializer):
             'id', 'name', 'description', 'year', 'category', 'genre', 'rating'
         )
         read_only_fields = ('id',)
-
-    def get_rating(self, obj):
-        obj = obj.reviews.all().aggregate(rating=Avg('score'))
-        return obj['rating']
 
 
 class TitleSerializerCreate(serializers.ModelSerializer):

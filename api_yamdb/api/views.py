@@ -70,25 +70,15 @@ def signup(request):
         serializer.is_valid()
         if serializer.validated_data['email'] != user.email:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        serializer.save()
-        send_confirmation_code(username)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     else:
         email = request.data.get('email')
         if User.objects.filter(email=email).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-    serializer = SignupSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    if serializer.validated_data['username'] != 'me':
-        serializer.save()
-        send_confirmation_code(username)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(
-        (
-            'Использование имени пользователя me запрещено!'
-        ),
-        status=status.HTTP_400_BAD_REQUEST
-    )
+        serializer = SignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+    serializer.save()
+    send_confirmation_code(username)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -161,7 +151,6 @@ class GenreViewSet(ExcludeRetrieveUpdateViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (ReviewPermission,)
     pagination_class = LimitOffsetPagination
